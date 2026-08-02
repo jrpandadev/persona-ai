@@ -2,7 +2,6 @@ from fastapi import APIRouter
 from app.models.chat import ChatRequest
 from app.services.candidate_loader import load_candidate
 from app.services.prompt_builder import build_prompt
-from app.services.llm import generate_response
 from fastapi.responses import StreamingResponse
 from app.services.llm import stream_response
 from fastapi import HTTPException
@@ -19,7 +18,8 @@ def chat(request: ChatRequest):
 
         prompt = build_prompt(
             candidate,
-            request.question
+            request.question,
+            request.history
         )
 
         return StreamingResponse(

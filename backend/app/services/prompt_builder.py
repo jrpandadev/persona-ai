@@ -40,7 +40,7 @@ def format_dict_section(title: str, data: dict) -> str:
     return text
 
 
-def build_prompt(candidate: dict, user_question: str) -> str:
+def build_prompt(candidate: dict, user_question: str, history: list) -> str:
 
     personal = candidate.get("personal", {})
     education = candidate.get("education", [])
@@ -50,6 +50,12 @@ def build_prompt(candidate: dict, user_question: str) -> str:
     achievements = candidate.get("achievements", [])
     certifications = candidate.get("certifications", [])
     social_links = candidate.get("social_links", {})
+
+    history_text = ""
+    for message in history:
+        history_text += (
+            f"{message.role.capitalize()}: {message.content}\n"
+        )
 
     # -----------------------------
     # Education
@@ -142,6 +148,11 @@ Duration: {exp.get("duration")}
     # -----------------------------
     prompt = f"""
 {SYSTEM_PROMPT}
+
+# Conversation History
+
+{history_text}
+
 
 # Candidate Profile
 
