@@ -1,0 +1,105 @@
+{
+  "personal": {
+    "name": "Jyoti Ranjan Panda",
+    "title": "AI Engineer | Mathematics & Computing Student",
+    "location": "Bhubaneswar, Odisha, India",
+    "email": "jrpanda.dev@gmail.com",
+    "bio": "Mathematics and Computing student passionate about AI Engineering, Machine Learning, and Software Development. I enjoy building practical AI applications using Python, FastAPI, and modern web technologies while continuously improving my problem-solving and engineering skills."
+  },
+  "education": [
+    {
+      "institution": "Odisha University of Technology and Research (OUTR)",
+      "degree": "Integrated M.Sc.",
+      "field_of_study": "Mathematics and Computing",
+      "cgpa": "8.4",
+      "start_year": "2025",
+      "end_year": "2030"
+    }
+  ],
+  "skills": {
+    "languages": [
+      "Python",
+      "C"
+    ],
+    "frameworks": [
+      "FastAPI",
+      "React"
+    ],
+    "frontend": [
+      "HTML",
+      "CSS"
+    ],
+    "ai_ml": [
+      "Prompt Engineering",
+      "LLM Integration"
+    ],
+    "databases": [],
+    "tools": [
+      "Git",
+      "GitHub",
+      "VS Code",
+      "uv"
+    ],
+    "cloud": [],
+    "other": [
+      "REST API Development"
+    ]
+  },
+  "projects": [
+    {
+      "name": "AI Portfolio",
+      "description": "An AI-powered portfolio where recruiters can chat with an AI version of the candidate.",
+      "tech_stack": [
+        "Python",
+        "FastAPI",
+        "Groq API",
+        "React"
+      ],
+      "highlights": [
+        "LLM Integration",
+        "Streaming Responses",
+        "Prompt Engineering",
+        "Job Description Matching"
+      ],
+      "github": "",
+      "live_demo": ""
+    },
+    {
+    "name": "CareerLens AI",
+    "description": "An AI-powered resume analysis and job matching platform that evaluates resumes against job descriptions, identifies skill gaps, and provides actionable feedback for candidates.",
+    "tech_stack": [
+      "Python",
+      "FastAPI",
+      "Groq API",
+      "Pydantic"
+    ],
+    "highlights": [
+      "Resume parsing",
+      "AI-powered resume scoring",
+      "Job description matching",
+      "Skill gap analysis",
+      "Structured JSON output",
+      "REST API development"
+    ],
+    "github": "https://github.com/jrpandadev/career-lens-ai",
+    "live_demo": ""
+  }
+  ],
+  "experience": [],
+  "certifications": [],
+  "achievements": [],
+  "social_links": {
+    "github": "https://github.com/jrpandadev",
+    "linkedin": "",
+    "portfolio": ""
+  },
+  "interests": [
+    "Artificial Intelligence",
+    "Machine Learning",
+    "Python",
+    "Backend Development",
+    "Mathematics",
+    "Software Engineering",
+    "Open Source"
+  ]
+}
