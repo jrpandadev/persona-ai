@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { GlassCard } from '../UI/GlassCard';
 import { analyzeJobMatch } from '../../services/api';
 import { Toast } from '../UI/Toast';
@@ -8,9 +8,18 @@ export function JobMatchBox({ jobDescription, onBack }) {
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const [toastMessage, setToastMessage] = useState('');
+  const abortControllerRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
+    
+    // Cancel any previous in-flight requests
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
     const runAnalysis = async () => {
       if (!jobDescription?.trim()) {
         if (isMounted) setLoading(false);
@@ -20,17 +29,29 @@ export function JobMatchBox({ jobDescription, onBack }) {
       setLoading(true);
       setError('');
       try {
-        const data = await analyzeJobMatch(jobDescription);
+        const data = await analyzeJobMatch(jobDescription, signal);
         if (isMounted) setResult(data);
       } catch (err) {
+        if (err.name === 'AbortError') {
+          console.log('Job match request was cancelled');
+          return;
+        }
         if (isMounted) setError(err.message || 'Failed to analyze job description.');
       } finally {
-        if (isMounted) setLoading(false);
+        if (isMounted && abortControllerRef.current?.signal === signal) {
+          setLoading(false);
+        }
       }
     };
     
     runAnalysis();
-    return () => { isMounted = false; };
+    
+    return () => { 
+      isMounted = false; 
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, [jobDescription]);
 
   const generateMarkdownReport = () => {
@@ -261,4 +282,3 @@ ${result.suggested_questions?.length ? `### Suggested Interview Questions\n${res
     </>
   );
 }
-

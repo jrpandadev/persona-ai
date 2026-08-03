@@ -15,7 +15,7 @@ router = APIRouter(prefix="/chat", tags=["Chat"])
 
 
 @router.post("/")
-def chat(request: ChatRequest):
+async def chat(request: ChatRequest):
     try:
         candidate = load_candidate()
 
@@ -26,10 +26,7 @@ def chat(request: ChatRequest):
             request.job_description,
         )
 
-        history = [
-            {"role": msg.role, "content": msg.content}
-            for msg in request.history
-        ]
+        history = [msg.model_dump() for msg in request.history]
 
         logger.info(f"Chat request: {len(request.question)} chars, {len(history)} history msgs")
 
@@ -55,7 +52,7 @@ def chat(request: ChatRequest):
 
 
 @router.post("/job-match")
-def job_match(request: JobMatchRequest):
+async def job_match(request: JobMatchRequest):
     try:
         candidate = load_candidate()
 
@@ -66,7 +63,7 @@ def job_match(request: JobMatchRequest):
 
         logger.info(f"Job match request: {len(request.job_description)} chars")
 
-        response_json_str = get_json_response(system_prompt, user_message)
+        response_json_str = await get_json_response(system_prompt, user_message)
 
         try:
             response_dict = json.loads(response_json_str)

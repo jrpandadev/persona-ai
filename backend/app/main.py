@@ -35,3 +35,13 @@ def validate_config():
 @app.get("/")
 def read_root():
     return {"message": "AI Portfolio Backend Running"}
+
+
+@app.get("/health")
+def health_check():
+    """Health check endpoint for Render/PaaS load balancers."""
+    return {
+        "status": "healthy",
+        "model": settings.MODEL_NAME,
+        "frontend_url": settings.FRONTEND_URL
+    }

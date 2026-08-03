@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { sendChatMessageStream } from '../services/api';
 import { trackQuestionAsked } from '../utils/analytics';
 
@@ -14,21 +14,35 @@ const INITIAL_MESSAGE = {
  * - Streaming API calls
  * - Auto-scroll via ref
  * - Loading / error states
- *
- * Keeps ChatBox as a pure presentation component.
+ * - Request cancellation via AbortController
  */
 export function useChat(jobDescription = null) {
   const [messages, setMessages] = useState([INITIAL_MESSAGE]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollAnchorRef = useRef(null);
+  const abortControllerRef = useRef(null);
 
-
+  // Cleanup pending requests if component unmounts
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   const handleSend = useCallback(
     async (overrideQuestion) => {
       const question = (overrideQuestion ?? input).trim();
-      if (!question || isLoading) return;
+      if (!question) return;
+
+      // Cancel any ongoing request before starting a new one
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
+      const signal = abortControllerRef.current.signal;
 
       setInput('');
 
@@ -47,18 +61,29 @@ export function useChat(jobDescription = null) {
       setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
 
       try {
-        await sendChatMessageStream(question, history, jobDescription, (chunk) => {
-          setMessages((prev) => {
-            const updated = [...prev];
-            const last = updated.length - 1;
-            updated[last] = {
-              ...updated[last],
-              content: updated[last].content + chunk,
-            };
-            return updated;
-          });
-        });
+        await sendChatMessageStream(
+          question, 
+          history, 
+          jobDescription, 
+          (chunk) => {
+            setMessages((prev) => {
+              const updated = [...prev];
+              const last = updated.length - 1;
+              updated[last] = {
+                ...updated[last],
+                content: updated[last].content + chunk,
+              };
+              return updated;
+            });
+          },
+          signal
+        );
       } catch (err) {
+        if (err.name === 'AbortError') {
+          console.log('Request was cancelled');
+          return; // Do nothing if we intentionally aborted
+        }
+        
         console.error('Chat error:', err);
         setMessages((prev) => {
           const updated = [...prev];
@@ -71,15 +96,21 @@ export function useChat(jobDescription = null) {
           return updated;
         });
       } finally {
-        setIsLoading(false);
+        if (abortControllerRef.current?.signal === signal) {
+          setIsLoading(false);
+        }
       }
     },
-    [input, isLoading, messages, jobDescription]
+    [input, messages, jobDescription]
   );
 
   const clearChat = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
     setMessages([INITIAL_MESSAGE]);
     setInput('');
+    setIsLoading(false);
   }, []);
 
   return {

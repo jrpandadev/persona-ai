@@ -1,14 +1,15 @@
+import asyncio
 import logging
-from groq import Groq
+from groq import AsyncGroq
 from app.config import settings
 
 logger = logging.getLogger("persona-ai")
 
-client = Groq(api_key=settings.GROQ_API_KEY)
+client = AsyncGroq(api_key=settings.GROQ_API_KEY)
 
 
-def stream_response(system_prompt: str, user_message: str, history: list = None):
-    """Stream an LLM response with proper system/user message separation."""
+async def stream_response(system_prompt: str, user_message: str, history: list = None):
+    """Stream an LLM response with proper system/user message separation (Async)."""
 
     messages = [{"role": "system", "content": system_prompt}]
 
@@ -19,25 +20,30 @@ def stream_response(system_prompt: str, user_message: str, history: list = None)
     messages.append({"role": "user", "content": user_message})
 
     try:
-        stream = client.chat.completions.create(
+        stream = await client.chat.completions.create(
             model=settings.MODEL_NAME,
             messages=messages,
             stream=True,
             max_tokens=2048,
         )
 
-        for chunk in stream:
+        async for chunk in stream:
             content = chunk.choices[0].delta.content
             if content:
                 yield content
+                await asyncio.sleep(0)  # Yield control back to event loop
+
+    except asyncio.CancelledError:
+        logger.info("Client disconnected during stream. Terminating gracefully.")
+        raise
 
     except Exception as e:
         logger.error(f"LLM streaming error: {e}")
         yield "Sorry, I encountered an issue generating a response. Please try again."
 
 
-def get_json_response(system_prompt: str, user_message: str) -> str:
-    """Get a non-streaming JSON response from the LLM."""
+async def get_json_response(system_prompt: str, user_message: str) -> str:
+    """Get a non-streaming JSON response from the LLM (Async)."""
 
     messages = [
         {"role": "system", "content": system_prompt},
@@ -45,7 +51,7 @@ def get_json_response(system_prompt: str, user_message: str) -> str:
     ]
 
     try:
-        response = client.chat.completions.create(
+        response = await client.chat.completions.create(
             model=settings.MODEL_NAME,
             messages=messages,
             response_format={"type": "json_object"},
