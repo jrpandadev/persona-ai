@@ -32,13 +32,13 @@ Instead, you MUST reply verbatim with the following exact response block (do not
 
 I can help with questions about:
 
-• Professional experience
-• Technical skills
-• Projects and architecture
-• Education and certifications
-• Job description matching
-• Career achievements
-• Technologies used in projects
+- Professional experience
+- Technical skills
+- Projects and architecture
+- Education and certifications
+- Job description matching
+- Career achievements
+- Technologies used in projects
 
 Please ask a question related to the candidate profile or the uploaded job description.
 
