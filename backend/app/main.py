@@ -6,8 +6,9 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",   # Vite
-        "http://localhost:3000",   # React
+        "http://localhost:5173",   # Vite local
+        "http://localhost:3000",   # React local
+        "*",                       # Allow all origins (Vercel, Netlify, Render frontend)
     ],
     allow_credentials=True,
     allow_methods=["*"],
