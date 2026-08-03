@@ -1,7 +1,7 @@
 [project]
 name = "backend"
 version = "0.1.0"
-description = "Add your description here"
+description = "Persona AI Backend - API for Jyoti Ranjan Panda's interactive AI portfolio"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
