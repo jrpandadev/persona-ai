@@ -10,13 +10,24 @@ logger = logging.getLogger("persona-ai")
 
 app = FastAPI(title=settings.APP_NAME)
 
+# Parse and clean origins from FRONTEND_URL
+allowed_origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:3000",
+]
+
+if settings.FRONTEND_URL:
+    for url in settings.FRONTEND_URL.split(","):
+        clean_url = url.strip().rstrip("/")
+        if clean_url and clean_url not in allowed_origins:
+            allowed_origins.append(clean_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:3000",
-        settings.FRONTEND_URL,
-    ],
+    allow_origins=allowed_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",  # Matches any Vercel domain / preview link
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

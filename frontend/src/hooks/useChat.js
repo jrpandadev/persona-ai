@@ -85,13 +85,16 @@ export function useChat(jobDescription = null) {
         }
         
         console.error('Chat error:', err);
+        const userFacingMessage = err.message
+          ? `Sorry, I ran into an issue: ${err.message}`
+          : 'Sorry, I ran into an issue connecting to the server. Please try again.';
+
         setMessages((prev) => {
           const updated = [...prev];
           const last = updated.length - 1;
           updated[last] = {
             role: 'assistant',
-            content:
-              'Sorry, I ran into an issue connecting to the server. Please try again.',
+            content: userFacingMessage,
           };
           return updated;
         });
