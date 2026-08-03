@@ -70,14 +70,20 @@ ${result.reason}
 
 ${result.final_verdict ? `### Final Verdict\n${result.final_verdict}\n` : ''}
 
-### Strengths
-${result.strengths?.map(s => `- ${s}`).join('\n')}
+### Strengths & Evidence
+${result.strengths?.map(s => `- **${s.skill || s}**: ${s.evidence || ''} *(Matches: ${s.requirement_matched || ''})*`).join('\n')}
 
-### Missing Skills
-${result.missing_skills?.map(m => `- ${m}`).join('\n')}
+### Missing Requirements
+${result.missing_skills?.map(m => `- **${m.skill || m}**: *(Unmet: ${m.requirement_unmet || ''})*`).join('\n')}
 
+${result.critical_missing_requirements?.length ? `### Critical Missing Requirements\n${result.critical_missing_requirements.map(c => `- ${c}`).join('\n')}\n` : ''}
+${result.transferable_skills?.length ? `### Transferable Skills\n${result.transferable_skills.map(t => `- **${t.skill || t}** could substitute for **${t.could_substitute_for || ''}**\n  *Reasoning:* ${t.reasoning || ''}`).join('\n')}\n` : ''}
+${result.evidence_for_deductions?.length ? `### Evidence for Deductions\n${result.evidence_for_deductions.map(e => `- ${e}`).join('\n')}\n` : ''}
 ${result.risks?.length ? `### Evaluation Risks\n${result.risks?.map(r => `- ${r}`).join('\n')}\n` : ''}
+
+${result.interview_recommendation ? `### Interview Recommendation\n${result.interview_recommendation}\n` : ''}
 ${result.suggested_questions?.length ? `### Suggested Interview Questions\n${result.suggested_questions?.map((q, i) => `${i + 1}. ${q}`).join('\n')}\n` : ''}
+${result.learning_roadmap?.length ? `### Learning Roadmap (To bridge gaps)\n${result.learning_roadmap?.map((step, i) => `${i + 1}. ${step}`).join('\n')}\n` : ''}
 `;
   };
 
@@ -156,23 +162,6 @@ ${result.suggested_questions?.length ? `### Suggested Interview Questions\n${res
                 </div>
               </div>
 
-              {/* Phase 1: Submitted Job Description */}
-              {jobDescription && (
-                <div className="p-4 bg-white/5 border border-white/10 rounded-xl print:border-gray-300 print:bg-gray-50 print:p-4">
-                  <h3 className="text-sm font-bold text-cyan-400 mb-2 print:text-black print:text-sm print:font-bold flex items-center gap-2">
-                    <span>📋</span> Phase 1: Submitted Job Description
-                  </h3>
-                  <div className="text-xs text-gray-300 print:text-gray-800 leading-relaxed whitespace-pre-wrap max-h-36 overflow-y-auto custom-scrollbar print:max-h-none print:overflow-visible">
-                    {jobDescription}
-                  </div>
-                </div>
-              )}
-
-              {/* Phase 2: Interview Evaluation & Match Analysis Header (Print Only) */}
-              <div className="hidden print:block text-xs font-mono uppercase tracking-wider font-bold text-gray-500 border-b border-gray-300 pb-1 mt-6">
-                Phase 2: Candidate Interview Evaluation & Match Analysis
-              </div>
-
               {/* Score & Confidence Section */}
               <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl print:border-black">
                 <div className="flex flex-col">
@@ -185,7 +174,7 @@ ${result.suggested_questions?.length ? `### Suggested Interview Questions\n${res
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className={`text-3xl font-bold ${result.score >= 70 ? 'text-green-400' : result.score >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
+                  <span className={`text-3xl font-bold ${result.score >= 80 ? 'text-green-400' : result.score >= 60 ? 'text-yellow-400' : result.score >= 40 ? 'text-orange-400' : 'text-red-400'}`}>
                     {result.score}%
                   </span>
                 </div>
@@ -228,13 +217,18 @@ ${result.suggested_questions?.length ? `### Suggested Interview Questions\n${res
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 bg-white/5 border border-green-500/20 rounded-xl">
                   <h3 className="text-sm font-bold text-green-400 mb-3 flex items-center gap-2">
-                    <span>💪</span> Strengths
+                    <span>💪</span> Strengths & Evidence
                   </h3>
-                  <ul className="space-y-2">
+                  <ul className="space-y-4">
                     {result.strengths?.length > 0 ? (
                       result.strengths.map((s, i) => (
-                        <li key={i} className="text-sm text-gray-300 flex items-start gap-2 print:text-black">
-                          <span className="text-green-500 mt-0.5">•</span> {s}
+                        <li key={i} className="text-sm text-gray-300 print:text-black">
+                          <div className="flex items-start gap-2">
+                            <span className="text-green-500 mt-0.5">•</span>
+                            <span className="font-bold text-white print:text-black">{s.skill || s}</span>
+                          </div>
+                          {s.evidence && <div className="text-xs text-gray-400 ml-4 mt-1">📝 {s.evidence}</div>}
+                          {s.requirement_matched && <div className="text-xs text-gray-500 ml-4 mt-1 italic">Matches: {s.requirement_matched}</div>}
                         </li>
                       ))
                     ) : (
@@ -245,13 +239,17 @@ ${result.suggested_questions?.length ? `### Suggested Interview Questions\n${res
 
                 <div className="p-4 bg-white/5 border border-red-500/20 rounded-xl">
                   <h3 className="text-sm font-bold text-red-400 mb-3 flex items-center gap-2">
-                    <span>⚠</span> Missing Skills
+                    <span>⚠</span> Missing Requirements
                   </h3>
-                  <ul className="space-y-2">
+                  <ul className="space-y-3">
                     {result.missing_skills?.length > 0 ? (
                       result.missing_skills.map((s, i) => (
-                        <li key={i} className="text-sm text-gray-300 flex items-start gap-2 print:text-black">
-                          <span className="text-red-500 mt-0.5">•</span> {s}
+                        <li key={i} className="text-sm text-gray-300 flex flex-col gap-1 print:text-black">
+                          <div className="flex items-start gap-2">
+                            <span className="text-red-500 mt-0.5">•</span>
+                            <span className="font-bold text-white print:text-black">{s.skill || s}</span>
+                          </div>
+                          {s.requirement_unmet && <div className="text-xs text-gray-500 ml-4 italic">Unmet: {s.requirement_unmet}</div>}
                         </li>
                       ))
                     ) : (
@@ -260,6 +258,68 @@ ${result.suggested_questions?.length ? `### Suggested Interview Questions\n${res
                   </ul>
                 </div>
               </div>
+
+              {/* Critical Missing Requirements */}
+              {result.critical_missing_requirements && result.critical_missing_requirements.length > 0 && (
+                <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+                  <h3 className="text-sm font-bold text-red-400 mb-3 flex items-center gap-2">
+                    <span>🛑</span> Critical Missing Requirements
+                  </h3>
+                  <ul className="space-y-2">
+                    {result.critical_missing_requirements.map((c, i) => (
+                      <li key={i} className="text-sm text-gray-300 flex items-start gap-2 print:text-black">
+                        <span className="text-red-500 mt-0.5">✗</span> {c}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Transferable Skills */}
+              {result.transferable_skills && result.transferable_skills.length > 0 && (
+                <div className="p-4 bg-cyan-500/5 border border-cyan-500/20 rounded-xl">
+                  <h3 className="text-sm font-bold text-cyan-400 mb-3 flex items-center gap-2">
+                    <span>🔄</span> Transferable Skills
+                  </h3>
+                  <ul className="space-y-3">
+                    {result.transferable_skills.map((t, i) => (
+                      <li key={i} className="text-sm text-gray-300 print:text-black">
+                        <div className="flex items-start gap-2">
+                          <span className="text-cyan-400 mt-0.5">•</span>
+                          <span><strong className="text-white print:text-black">{t.skill || t}</strong> could substitute for <strong className="text-white print:text-black">{t.could_substitute_for}</strong></span>
+                        </div>
+                        {t.reasoning && <div className="text-xs text-gray-400 ml-4 mt-1">Reasoning: {t.reasoning}</div>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Evidence for Deductions */}
+              {result.evidence_for_deductions && result.evidence_for_deductions.length > 0 && (
+                <div className="p-4 bg-orange-500/5 border border-orange-500/20 rounded-xl">
+                  <h3 className="text-sm font-bold text-orange-400 mb-3 flex items-center gap-2">
+                    <span>📉</span> Evidence for Deductions
+                  </h3>
+                  <ul className="space-y-2">
+                    {result.evidence_for_deductions.map((e, i) => (
+                      <li key={i} className="text-sm text-gray-300 flex items-start gap-2 print:text-black">
+                        <span className="text-orange-500 mt-0.5">-</span> {e}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Interview Recommendation */}
+              {result.interview_recommendation && (
+                <div className="p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl">
+                  <h3 className="text-sm font-bold text-blue-400 mb-1 flex items-center gap-2">
+                    <span>🗣️</span> Interview Recommendation
+                  </h3>
+                  <p className="text-sm text-gray-300 leading-relaxed print:text-black">{result.interview_recommendation}</p>
+                </div>
+              )}
 
               {/* Suggested Questions */}
               {result.suggested_questions && result.suggested_questions.length > 0 && (
@@ -271,6 +331,22 @@ ${result.suggested_questions?.length ? `### Suggested Interview Questions\n${res
                     {result.suggested_questions.map((q, i) => (
                       <li key={i} className="text-sm text-gray-300 flex items-start gap-2 print:text-black">
                         <span className="text-indigo-400 font-bold mt-0.5">{i + 1}.</span> {q}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
+              {/* Learning Roadmap */}
+              {result.learning_roadmap && result.learning_roadmap.length > 0 && (
+                <div className="p-4 bg-green-500/5 border border-green-500/20 rounded-xl">
+                  <h3 className="text-sm font-bold text-green-400 mb-3 flex items-center gap-2">
+                    <span>📚</span> Learning Roadmap (To bridge gaps)
+                  </h3>
+                  <ol className="space-y-2">
+                    {result.learning_roadmap.map((step, i) => (
+                      <li key={i} className="text-sm text-gray-300 flex items-start gap-2 print:text-black">
+                        <span className="text-green-400 font-bold mt-0.5">{i + 1}.</span> {step}
                       </li>
                     ))}
                   </ol>

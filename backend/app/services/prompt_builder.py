@@ -5,9 +5,9 @@ def _format_list_section(title: str, items: list) -> str:
     """Formats a simple list section."""
     if not items:
         return ""
-    lines = [f"\n## {title}\n"]
+    lines = [f"\n[{title.upper()}]\n"]
     for item in items:
-        lines.append(f"- {item}")
+        lines.append(f"  - {item}")
     return "\n".join(lines)
 
 
@@ -15,12 +15,12 @@ def _format_dict_section(title: str, data: dict) -> str:
     """Formats a dictionary section."""
     if not data:
         return ""
-    lines = [f"\n## {title}\n"]
+    lines = [f"\n[{title.upper()}]\n"]
     for key, value in data.items():
         if isinstance(value, list) and value:
-            lines.append(f"{key.title()}: {', '.join(str(v) for v in value)}")
+            lines.append(f"  {key.title()}: {', '.join(str(v) for v in value)}")
         elif value:
-            lines.append(f"{key.title()}: {value}")
+            lines.append(f"  {key.title()}: {value}")
     return "\n".join(lines)
 
 
@@ -42,28 +42,28 @@ def _format_candidate_profile(candidate: dict) -> str:
             info.append(f"Email: {email}")
         if bio := personal.get("bio"):
             info.append(f"\nBio: {bio}")
-        sections.append("## Personal Information\n\n" + "\n".join(info))
+        sections.append("[PERSONAL INFORMATION]\n\n" + "\n".join(info))
 
     # Education
     education = candidate.get("education", [])
     if education:
-        lines = ["## Education\n"]
+        lines = ["[EDUCATION]"]
         for edu in education:
             parts = []
             if inst := edu.get("institution"):
-                parts.append(f"Institution: {inst}")
+                parts.append(f"  Institution: {inst}")
             if degree := edu.get("degree"):
-                parts.append(f"Degree: {degree}")
+                parts.append(f"  Degree: {degree}")
             if field := edu.get("field_of_study"):
-                parts.append(f"Field: {field}")
+                parts.append(f"  Field: {field}")
             if cgpa := edu.get("cgpa"):
-                parts.append(f"CGPA: {cgpa}")
+                parts.append(f"  CGPA: {cgpa}")
             start = edu.get("start_year", "")
             end = edu.get("end_year", "")
             if start or end:
-                parts.append(f"Duration: {start} - {end}")
+                parts.append(f"  Duration: {start} - {end}")
             lines.append("\n".join(parts))
-        sections.append("\n".join(lines))
+        sections.append("\n\n".join(lines))
 
     # Skills
     skills = candidate.get("skills", {})
@@ -73,38 +73,38 @@ def _format_candidate_profile(candidate: dict) -> str:
     # Projects
     projects = candidate.get("projects", [])
     if projects:
-        lines = ["## Projects\n"]
+        lines = ["[PROJECTS]"]
         for proj in projects:
-            parts = [f"Project: {proj.get('name', 'Unnamed')}"]
+            parts = [f"  Name: {proj.get('name', 'Unnamed')}"]
             if desc := proj.get("description"):
-                parts.append(f"Description: {desc}")
+                parts.append(f"  Description: {desc}")
             if tech := proj.get("tech_stack"):
-                parts.append(f"Tech Stack: {', '.join(tech)}")
+                parts.append(f"  TechStack: {', '.join(tech)}")
             if highlights := proj.get("highlights"):
-                parts.append("Highlights:")
+                parts.append("  Highlights:")
                 for h in highlights:
-                    parts.append(f"  - {h}")
+                    parts.append(f"    - {h}")
             if github := proj.get("github"):
-                parts.append(f"GitHub: {github}")
-            lines.append("\n".join(parts) + "\n")
-        sections.append("\n".join(lines))
+                parts.append(f"  GitHub: {github}")
+            lines.append("\n".join(parts))
+        sections.append("\n\n".join(lines))
 
     # Experience
     experience = candidate.get("experience", [])
     if experience:
-        lines = ["## Experience\n"]
+        lines = ["[EXPERIENCE]"]
         for exp in experience:
-            parts = [f"Organization: {exp.get('organization', 'Unknown')}"]
+            parts = [f"  Organization: {exp.get('organization', 'Unknown')}"]
             if role := exp.get("role"):
-                parts.append(f"Role: {role}")
+                parts.append(f"  Role: {role}")
             if duration := exp.get("duration"):
-                parts.append(f"Duration: {duration}")
+                parts.append(f"  Duration: {duration}")
             if responsibilities := exp.get("responsibilities"):
-                parts.append("Responsibilities:")
+                parts.append("  Responsibilities:")
                 for r in responsibilities:
-                    parts.append(f"  - {r}")
-            lines.append("\n".join(parts) + "\n")
-        sections.append("\n".join(lines))
+                    parts.append(f"    - {r}")
+            lines.append("\n".join(parts))
+        sections.append("\n\n".join(lines))
 
     # Achievements
     achievements = candidate.get("achievements", [])

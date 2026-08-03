@@ -46,7 +46,7 @@ function App() {
 
         <Navbar />
 
-        <main className="pt-24 pb-16 px-6 md:px-12 max-w-[1400px] mx-auto z-10 relative space-y-12 print:p-0 print:m-0 print:max-w-none">
+        <main className="pt-24 pb-16 px-6 md:px-12 max-w-[1400px] mx-auto z-10 relative space-y-12 print:space-y-0 print:p-0 print:m-0 print:max-w-none">
           {/* Hero + Interactive Section — side by side on desktop */}
           <section
             id="home"
