@@ -1,472 +1,152 @@
 # 🤖 AI Portfolio – Intelligent Recruiter Assistant
 
-An AI-powered interactive portfolio that allows recruiters to chat with an AI representative of the candidate, analyze job descriptions, evaluate candidate suitability, and generate professional interview recommendations.
+An AI-powered, interactive portfolio ecosystem that allows recruiters to chat with an AI representative of the candidate, perform rigorous job description matching, evaluate suitability based on raw evidence, and export comprehensive interview reports.
 
-Unlike a traditional portfolio website, this project uses Large Language Models (LLMs) to provide a conversational and context-aware experience while ensuring responses remain grounded in the candidate's profile.
-
----
-
-## ✨ Features
-
-### 🤖 AI Candidate Assistant
-
-- Interactive AI chatbot
-- Answers only questions related to the candidate
-- No hallucinations
-- Professional recruiter-friendly responses
-- Context-aware conversations
+Unlike traditional static portfolios, this project utilizes Large Language Models (LLMs) to provide a conversational, context-aware experience while strictly grounding answers to the candidate's verified profile.
 
 ---
 
-### 💬 Conversation Memory
+## ✨ Key Features
 
-- Maintains conversation history
-- Understands follow-up questions
-- Natural multi-turn conversations
-
-Example:
-
-> Recruiter:
-> Tell me about your projects.
-
-> Recruiter:
-> Which one demonstrates backend development?
-
-The AI understands the second question without requiring the recruiter to repeat the context.
+- **🤖 AI Candidate Assistant:** Interactive chat powered by LLMs (e.g. Llama 3.3 via Groq) acting as a dedicated AI career representative. Operates under strict zero-hallucination, identity-protection, and out-of-scope filtering guidelines.
+- **💬 Conversational Memory:** Seamless multi-turn memory to understand follow-up questions natively.
+- **📊 Job Description Matching:** paste a complete job description to run a rigorous, honest, and evidence-based analysis (scores matching skills, highlights missing/transferable skills, detail roadmaps, and justifies any score deductions).
+- **📄 Interview Report PDF Export:** One-click PDF generation that targets *only* the interview report and scorecard (clean styling, excludes outer web content).
+- **🎤 Web Speech Integration:** Features Voice Input (Speech-to-Text) and Audio Response (Speech Synthesis/Text-to-Speech) for an interactive, hands-free experience.
+- **⚡ Real-time Streaming:** Smooth, token-by-token message streaming matching modern AI interfaces (ChatGPT, Gemini, Claude).
 
 ---
 
-### 💼 Job Description Matching
+## 🛠 Tech Stack
 
-Recruiters can paste an entire Job Description.
+### Frontend
+- **Framework:** React + Vite
+- **Styling:** Vanilla CSS (Tailwind variables/modern properties, dark mode theme)
+- **State/Libraries:** Framer Motion (animations), React Markdown + `remark-gfm` (full GitHub-Flavored Markdown support)
 
-The AI will compare it against the candidate profile and provide:
-
-- Overall Match Score
-- Strengths
-- Missing Skills
-- Areas of Improvement
-- Interview Recommendation
-- Detailed Explanation
-
-The AI is instructed to provide **honest, evidence-based evaluations** and never inflate the match score.
+### Backend
+- **Framework:** FastAPI (Python 3.11+)
+- **Package Manager:** `uv`
+- **LLM Integration:** AsyncGroq Client (supporting JSON mode structures for metrics and streaming for chat)
+- **Validation:** Pydantic v2
 
 ---
 
-### 📊 Recruiter Dashboard
+## 📂 Project Structure
 
-Displays structured analysis including:
-
-- Match Percentage
-- Recommendation
-- Technical Strengths
-- Missing Skills
-- Skill Breakdown
-- Confidence Level
-
----
-
-### 📄 Interview Report Generator
-
-Generate a recruiter-friendly report containing:
-
-- Candidate Summary
-- Match Score
-- Strengths
-- Weaknesses
-- Interview Recommendation
-- Suggested Interview Questions
-
----
-
-### 🎤 Voice Input
-
-Supports Speech-to-Text using the browser's Web Speech API.
-
-Recruiters can ask questions using their microphone instead of typing.
-
----
-
-### 🔊 AI Voice Response
-
-Supports Text-to-Speech using the browser Speech Synthesis API.
-
-The AI can read its responses aloud.
-
----
-
-### ⚡ Streaming Responses
-
-Responses are streamed token-by-token to provide a ChatGPT-like experience.
-
----
-
-### 📋 Copy Response
-
-Copy any AI response with a single click.
-
----
-
-### 🗑 Clear Conversation
-
-Reset the conversation while preserving the welcome message.
-
----
-
-### 📱 Responsive Design
-
-Optimized for:
-
-- Desktop
-- Tablet
-- Mobile
-
----
-
-### 🌙 Modern UI
-
-- Clean recruiter-focused interface
-- Dark theme
-- Smooth animations
-- Professional portfolio layout
-
----
-
-# 🏗 Architecture
-
-```
-                    React Frontend
-                           │
-                           ▼
-                  FastAPI Backend
-                           │
-        ┌──────────────────┼──────────────────┐
-        │                  │                  │
-        ▼                  ▼                  ▼
- Candidate Profile   Conversation      Job Description
-     (JSON)             Memory            (Optional)
-        │                  │                  │
-        └──────────────────┼──────────────────┘
-                           ▼
-                    Prompt Builder
-                           ▼
-                        Groq API
-                           ▼
-                     AI Response
-```
-
----
-
-# 🛠 Tech Stack
-
-## Frontend
-
-- React
-- Vite
-- Tailwind CSS
-- React Icons
-- React Markdown
-
----
-
-## Backend
-
-- Python
-- FastAPI
-- Pydantic
-- Uvicorn
-- Groq API
-- python-dotenv
-
----
-
-## AI
-
-- Groq
-- Llama 3.3 70B Versatile
-- Prompt Engineering
-
----
-
-## Browser APIs
-
-- Web Speech API
-- Speech Synthesis API
-
----
-
-# 📂 Project Structure
-
-```
-AI-Portfolio/
-
+```text
+ai-portfolio-chatbot/
 ├── backend/
-│
 │   ├── app/
-│   │
-│   ├── routes/
-│   │      chat.py
-│   │
-│   ├── services/
-│   │      llm.py
-│   │      prompt_builder.py
-│   │
-│   ├── models/
-│   │      chat.py
-│   │
-│   ├── data/
-│   │      candidate.json
-│   │
-│   └── main.py
-│
-│   requirements.txt
-│
+│   │   ├── data/
+│   │   │   └── candidate.json         # Authoritative candidate profile
+│   │   ├── models/
+│   │   │   └── chat.py                # Pydantic schemas
+│   │   ├── routes/
+│   │   │   └── chat.py                # Chat & job match API endpoints
+│   │   ├── services/
+│   │   │   ├── llm.py                 # Async Groq wrapper
+│   │   │   └── prompt_builder.py      # Structured system prompt construction
+│   │   ├── main.py                    # FastAPI app initialization
+│   │   └── prompts.py                 # Master system prompts and constraints
+│   ├── pyproject.toml
+│   └── uv.lock
 └── frontend/
-    │
     ├── src/
-    │
-    ├── components/
-    │
-    ├── pages/
-    │
-    ├── App.jsx
-    │
-    └── main.jsx
+    │   ├── components/
+    │   │   ├── Chat/                  # ChatBox, ChatMessage components
+    │   │   ├── JobMatch/              # JobMatchBox, ScoreCard components
+    │   │   └── UI/                    # Shared layout elements
+    │   ├── App.jsx
+    │   ├── index.css                  # Global styles & Print media overrides
+    │   └── main.jsx
+    ├── package.json
+    └── vite.config.js
 ```
 
 ---
 
-# 🚀 Getting Started
+## 🚀 Getting Started
 
-## Clone Repository
-
+### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/your-repository.git
-
-cd your-repository
+git clone https://github.com/jrpandadev/persona-ai.git
+cd persona-ai
 ```
 
----
-
-# ⚙ Backend Setup
-
-Create virtual environment
+### 2. Backend Setup
+The backend uses **`uv`** for extremely fast Python environment and dependency management.
 
 ```bash
+cd backend
+
+# Create virtual environment and sync dependencies
 uv venv
-```
-
-Activate
-
-Windows
-
-```bash
-.venv\Scripts\activate
-```
-
-Install dependencies
-
-```bash
 uv sync
+
+# Create your environmental configuration
+cp .env.example .env  # Or manually create .env
 ```
 
-Create `.env`
-
+Configure your `.env` file with your Groq API Key:
 ```env
-GROQ_API_KEY=your_api_key
-
+GROQ_API_KEY=your_groq_api_key_here
 MODEL_NAME=llama-3.3-70b-versatile
-
-APP_NAME=Persona AI Backend
-
+APP_NAME="Persona AI Backend"
 DEBUG=True
 ```
 
-Run server
-
+Start the FastAPI application:
 ```bash
 uv run uvicorn app.main:app --reload
 ```
+- API Endpoint: `http://127.0.0.1:8000`
+- Interactive API Docs: `http://127.0.0.1:8000/docs`
 
-Backend
-
-```
-http://127.0.0.1:8000
-```
-
-API Docs
-
-```
-http://127.0.0.1:8000/docs
-```
-
----
-
-# 💻 Frontend Setup
-
-Navigate
-
+### 3. Frontend Setup
 ```bash
-cd frontend
-```
+cd ../frontend
 
-Install
-
-```bash
+# Install dependencies
 npm install
-```
 
-Create
-
-```
-.env
-```
-
-```env
-VITE_API_URL=http://127.0.0.1:8000
-```
-
-Run
-
-```bash
+# Run the development server
 npm run dev
 ```
+- App URL: `http://localhost:5173`
 
 ---
 
-# 💬 Example Questions
-
-Recruiters can ask:
-
-- Tell me about yourself.
-- Explain CareerLens AI.
-- Describe your technical skills.
-- Which project best demonstrates backend development?
-- Why should we hire you?
-- What technologies do you know?
-- Explain your AI projects.
-- How does your experience match this Job Description?
+## 🚫 Out-of-Scope Safety Filtering
+The AI agent is locked into candidate-related topics. If asked general knowledge, political, or off-topic prompts, it automatically and politely refuses:
+> "I'm designed specifically to answer questions about Jyoti Ranjan Panda, including his background, skills, projects, experience, and any uploaded job description. I can't reliably answer unrelated general knowledge questions."
 
 ---
 
-# 🚫 Out-of-Scope Questions
+## 🌐 Deployment Guidelines
 
-The AI only answers questions related to:
+### Backend (Render/Railway/etc.)
+- Deploy the `/backend` directory.
+- Configure variables: `GROQ_API_KEY`, `MODEL_NAME`, and set `DEBUG=False`.
 
-- Candidate Profile
-- Uploaded Job Description
-- Previous conversation
-
-If an unrelated question is asked, it politely responds:
-
-> I'm designed specifically to answer questions about the candidate's background, technical skills, projects, education, and professional experience. Your question isn't related to the available candidate information, so I can't answer it. Please ask something related to the candidate profile or the uploaded job description.
-
----
-
-# 🔐 AI Safety
-
-The AI is explicitly instructed to:
-
-- Never hallucinate
-- Never invent skills
-- Never fabricate experience
-- Never answer unrelated questions
-- Be transparent when information is unavailable
-- Base every response only on the provided context
+### Frontend (Vercel/Netlify/etc.)
+- Deploy the `/frontend` directory.
+- Set build command: `npm run build`.
+- Add environment variable: `VITE_API_URL=https://your-backend-url.com`.
 
 ---
 
-# 📊 Job Matching
+## 👨‍💻 Author
 
-The evaluation considers:
-
-- Technical Skills
-- Projects
-- Experience
-- Education
-- Certifications
-- Achievements
-
-The AI explains every deduction and provides a transparent recommendation rather than simply returning a high score.
-
----
-
-# 🌐 Deployment
-
-## Backend
-
-- Render
-
-Environment Variables
-
-```
-GROQ_API_KEY
-
-MODEL_NAME
-
-DEBUG=False
-```
-
----
-
-## Frontend
-
-- Vercel
-
-Environment Variable
-
-```
-VITE_API_URL=https://your-render-url.onrender.com
-```
-
----
-
-# 🔮 Future Improvements
-
-- Authentication
-- Resume Upload Support
-- Multi-Candidate Profiles
-- PDF Export
-- Analytics Dashboard
-- Multiple LLM Providers
-- Docker Support
-- CI/CD Pipeline
-- Unit & Integration Tests
-- Admin Dashboard
-
----
-
-# 📸 Screenshots
-
-Add screenshots here:
-
-- Home Page
-- AI Chat
-- Job Description Analyzer
-- Recruiter Dashboard
-- Mobile View
-
----
-
-# 👨💻 Author
-
-**Jyoti Ranjan Panda**
-
-Integrated M.Sc. in Mathematics & Computing
-
-Odisha University of Technology and Research (OUTR), Bhubaneswar
+**Jyoti Ranjan Panda**  
+Integrated M.Sc. in Mathematics & Computing  
+Odisha University of Technology and Research (OUTR), Bhubaneswar  
 
 ### Connect
-
-- GitHub: https://github.com/yourusername
-- LinkedIn: https://linkedin.com/in/yourprofile
-
----
-
-# 📄 License
-
-This project is licensed under the MIT License.
+- **GitHub:** [github.com/jrpandadev](https://github.com/jrpandadev)
+- **Email:** [jrpanda.dev@gmail.com](mailto:jrpanda.dev@gmail.com)
 
 ---
 
-## ⭐ If you found this project interesting, consider giving it a star!
+## 📄 License
+This project is licensed under the MIT License - see the LICENSE file for details.
