@@ -69,8 +69,11 @@ ai-portfolio-chatbot/
 ## 🚀 Getting Started
 
 ### 1. Clone the Repository
+Since this is a private repository, ensure you have set up your SSH keys or GitHub Personal Access Token (PAT).
+
 ```bash
-git clone https://github.com/jrpandadev/persona-ai.git
+# Clone using SSH (Recommended)
+git clone git@github.com:jrpandadev/persona-ai.git
 cd persona-ai
 ```
 
