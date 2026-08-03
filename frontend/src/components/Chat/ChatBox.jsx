@@ -1,153 +1,208 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { sendChatMessageStream } from '../../services/api';
+import { useState, useEffect, useRef } from 'react';
+import { useChat } from '../../hooks/useChat';
+import { ChatMessage } from './ChatMessage';
+import { PromptChips } from './PromptChips';
+import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 
-export function ChatBox() {
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content: "Hello! I'm Jyoti's AI assistant. How can I help you explore his work today? You can ask about his projects, skills, or download his CV."
-    }
-  ]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const chatScrollRef = useRef(null);
+/**
+ * Chat interface — pure presentation component.
+ * All business logic lives in the useChat hook.
+ *
+ * Features:
+ * - Streaming AI responses
+ * - Suggested prompt chips (before first user message)
+ * - Animated typing indicator
+ * - Glassmorphism design
+ * - Accessible labels
+ */
+export function ChatBox({ jobDescription }) {
+  const { messages, input, setInput, isLoading, handleSend, clearChat } = useChat(jobDescription);
+  const messagesContainerRef = useRef(null);
+  
+  const [baseInput, setBaseInput] = useState('');
+  const { isListening, transcript, error: speechError, toggleListening } = useSpeechRecognition();
 
   useEffect(() => {
-    if (chatScrollRef.current) {
-      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    if (isListening) {
+      setInput((baseInput ? baseInput + ' ' : '') + transcript);
     }
-  }, [messages, isLoading]);
+  }, [transcript, isListening, baseInput, setInput]);
 
-  const handleSend = async (e) => {
-    e?.preventDefault();
-    if (!input.trim() || isLoading) return;
-
-    const userQuestion = input.trim();
-    setInput('');
-
-    // Prepare current history for backend
-    const currentHistory = messages.map((msg) => ({
-      role: msg.role === 'assistant' ? 'assistant' : 'user',
-      content: msg.content
-    }));
-
-    // Add user message to UI
-    setMessages((prev) => [...prev, { role: 'user', content: userQuestion }]);
-    setIsLoading(true);
-
-    // Placeholder assistant message for streaming
-    setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
-
-    try {
-      await sendChatMessageStream(userQuestion, currentHistory, (chunk) => {
-        setMessages((prev) => {
-          const updated = [...prev];
-          const lastIndex = updated.length - 1;
-          updated[lastIndex] = {
-            ...updated[lastIndex],
-            content: updated[lastIndex].content + chunk
-          };
-          return updated;
-        });
-      });
-    } catch (err) {
-      console.error(err);
-      setMessages((prev) => {
-        const updated = [...prev];
-        const lastIndex = updated.length - 1;
-        updated[lastIndex] = {
-          role: 'assistant',
-          content: 'Sorry, I ran into an issue connecting to the AI backend server.'
-        };
-        return updated;
-      });
-    } finally {
-      setIsLoading(false);
+  const handleToggleListening = () => {
+    if (!isListening) {
+      setBaseInput(input.trim());
     }
+    toggleListening();
   };
 
+  const textareaRef = useRef(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      // Max height of 150px before scrolling
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 150)}px`;
+    }
+  }, [input]);
+
+  const [placeholderIdx, setPlaceholderIdx] = useState(0);
+  const placeholders = [
+    'Ask me anything...',
+    'Ask about CareerLens AI...',
+    'Explain CareerLens AI...',
+    'Show your projects...',
+    'Why should we hire you?',
+    'What technologies do you know?',
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholderIdx((prev) => (prev + 1) % 6);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Internal container auto-scroll on new message or streaming chunk
+  useEffect(() => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const hasUserMessages = messages.some((m) => m.role === 'user');
+
   return (
-    <div id="chat" className="w-full max-w-lg h-[600px] bg-neutral-950/80 border border-white/10 backdrop-blur-2xl rounded-2xl flex flex-col relative overflow-hidden shadow-2xl">
-      {/* Glow background */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none"></div>
+    <div
+      id="chat"
+      className="
+        w-full max-w-xl h-[560px] md:h-[600px] scroll-mt-28
+        bg-surface-950/80 border border-white/8 backdrop-blur-2xl
+        rounded-2xl flex flex-col relative overflow-hidden
+        shadow-2xl shadow-black/40
+      "
+      role="region"
+      aria-label="AI Chat"
+    >
+      {/* Background glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-indigo-500/8 rounded-full blur-[100px] pointer-events-none" />
 
       {/* Header */}
-      <div className="h-16 border-b border-white/10 flex items-center px-6 justify-between bg-white/5 z-10">
+      <div className="h-14 border-b border-white/8 flex items-center px-5 justify-between bg-white/[0.02] z-10">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded bg-neutral-800 flex items-center justify-center border border-white/10 text-cyan-400 font-bold">
-            AI
+          <div className="w-9 h-9 rounded-full overflow-hidden border border-cyan-400/30 shadow-[0_0_10px_rgba(6,182,212,0.15)] flex-shrink-0">
+            <img src="/avatar.png" alt="Jyoti" className="w-full h-full object-cover" style={{ objectPosition: '22% 15%' }} />
           </div>
           <div>
-            <h3 className="font-mono text-xs text-white">Jyoti.AI Assistant</h3>
-            <div className="flex items-center gap-2 mt-0.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></div>
-              <span className="text-[10px] text-gray-400 uppercase tracking-wider font-mono">Online</span>
+            <h3 className="font-mono text-xs text-white font-medium">
+              Jyoti.AI Assistant
+            </h3>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[10px] text-gray-500 uppercase tracking-wider font-mono">
+                Online
+              </span>
             </div>
           </div>
         </div>
+
+        {/* Clear Chat Button */}
+        {hasUserMessages && (
+          <button
+            onClick={clearChat}
+            disabled={isLoading}
+            className="
+              px-2.5 py-1 text-[11px] font-mono text-gray-400 border border-white/10 rounded-md
+              hover:text-white hover:border-red-400/40 hover:bg-red-500/10
+              transition-all duration-200 disabled:opacity-30
+            "
+          >
+            🗑 Clear
+          </button>
+        )}
       </div>
 
       {/* Messages */}
-      <div ref={chatScrollRef} className="flex-grow p-6 overflow-y-auto flex flex-col gap-6 z-10">
+      <div ref={messagesContainerRef} className="flex-grow px-5 py-4 overflow-y-auto flex flex-col gap-4 z-10">
         {messages.map((msg, idx) => (
-          <div
+          <ChatMessage
             key={idx}
-            className={`flex gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
-          >
-            <div
-              className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center border text-xs font-bold ${
-                msg.role === 'user'
-                  ? 'bg-neutral-800 border-white/10 text-white'
-                  : 'bg-indigo-500/20 border-indigo-500/30 text-indigo-400'
-              }`}
-            >
-              {msg.role === 'user' ? 'U' : 'AI'}
-            </div>
-            <div
-              className={`rounded-2xl p-4 text-sm max-w-[85%] leading-relaxed ${
-                msg.role === 'user'
-                  ? 'bg-indigo-600 text-white rounded-tr-sm'
-                  : 'bg-neutral-900/90 border border-white/10 text-gray-200 rounded-tl-sm'
-              }`}
-            >
-              {msg.content}
-            </div>
-          </div>
+            role={msg.role}
+            content={msg.content}
+            index={idx}
+            isStreaming={isLoading && idx === messages.length - 1 && msg.role === 'assistant'}
+          />
         ))}
 
-        {isLoading && (
-          <div className="flex gap-4">
-            <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex-shrink-0 flex items-center justify-center border border-indigo-500/30 text-indigo-400 text-xs font-bold">
-              AI
-            </div>
-            <div className="bg-neutral-900/90 border border-white/10 rounded-2xl rounded-tl-sm p-4 flex items-center justify-center h-[48px] w-[60px]">
-              <div className="flex space-x-1">
-                <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce"></div>
-                <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
-              </div>
-            </div>
-          </div>
+        {/* Prompt chips — shown only before first user interaction */}
+        {!hasUserMessages && !isLoading && (
+          <PromptChips onSelect={(text) => handleSend(text)} />
         )}
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSend} className="p-4 border-t border-white/10 bg-black/40 z-10 backdrop-blur-md">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSend();
+        }}
+        className="p-3 border-t border-white/8 bg-surface-950/60 z-10 backdrop-blur-md"
+      >
         <div className="relative flex items-center">
-          <input
-            type="text"
+          <label htmlFor="chat-input" className="sr-only">
+            Type your question
+          </label>
+          <textarea
+            id="chat-input"
+            ref={textareaRef}
+            rows={1}
             value={input}
+            disabled={isLoading}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask me anything..."
-            className="w-full bg-neutral-900/50 border border-white/10 rounded-full py-3 pl-4 pr-12 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400/50 transition-all"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            placeholder={placeholders[placeholderIdx]}
+            autoComplete="off"
+            className="
+              w-full bg-white/[0.03] border border-white/8 rounded-xl
+              py-3 pl-4 pr-24 text-sm text-white resize-none
+              placeholder-gray-500
+              focus:outline-none focus:border-cyan-400/40 focus:bg-white/[0.05]
+              transition-all duration-200 overflow-y-auto
+              min-h-[44px]
+            "
           />
-          <button
-            type="submit"
-            disabled={isLoading || !input.trim()}
-            className="absolute right-2 w-8 h-8 flex items-center justify-center bg-indigo-600 disabled:opacity-50 rounded-full text-white hover:brightness-110 transition-all active:scale-95"
-          >
-            ➔
-          </button>
+          <div className="absolute right-2 bottom-3 flex items-center gap-1 h-8">
+            <button
+              type="button"
+              onClick={handleToggleListening}
+              title={speechError ? speechError : "Voice Input"}
+              className={`
+                w-8 h-8 flex items-center justify-center rounded-lg text-sm transition-all duration-200
+                ${isListening ? 'bg-red-500/20 text-red-400 animate-pulse' : 'text-gray-400 hover:text-white hover:bg-white/10'}
+                ${speechError ? 'opacity-50 cursor-not-allowed' : ''}
+              `}
+            >
+              🎤
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading || !input.trim()}
+              aria-label="Send message"
+              className="
+                w-8 h-8 flex items-center justify-center
+                bg-indigo-600 disabled:opacity-30 disabled:cursor-not-allowed
+                rounded-lg text-white text-sm
+                hover:brightness-110 active:scale-90
+                transition-all duration-200
+              "
+            >
+              ➔
+            </button>
+          </div>
         </div>
       </form>
     </div>

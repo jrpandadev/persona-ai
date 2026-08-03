@@ -40,7 +40,7 @@ def format_dict_section(title: str, data: dict) -> str:
     return text
 
 
-def build_prompt(candidate: dict, user_question: str, history: list) -> str:
+def build_prompt(candidate: dict, user_question: str, history: list, job_description: str | None = None) -> str:
 
     personal = candidate.get("personal", {})
     education = candidate.get("education", [])
@@ -144,6 +144,13 @@ Duration: {exp.get("duration")}
             experience_text += "\n"
 
     # -----------------------------
+    # Job Description
+    # -----------------------------
+    jd_text = ""
+    if job_description and job_description.strip():
+        jd_text = f"\n# Job Description Context\n\n{job_description}\n"
+
+    # -----------------------------
     # Final Prompt
     # -----------------------------
     prompt = f"""
@@ -152,7 +159,7 @@ Duration: {exp.get("duration")}
 # Conversation History
 
 {history_text}
-
+{jd_text}
 
 # Candidate Profile
 
@@ -186,4 +193,42 @@ Bio:
 {user_question}
 """
 
+    return prompt
+
+
+def build_job_match_prompt(candidate: dict, job_description: str) -> str:
+    from app.prompts import JOB_MATCH_SYSTEM_PROMPT
+
+    personal = candidate.get("personal", {})
+    skills = candidate.get("skills", {})
+    projects = candidate.get("projects", [])
+    experience = candidate.get("experience", [])
+
+    candidate_summary = f"""
+Name: {personal.get("name")}
+Title: {personal.get("title")}
+
+{format_dict_section("Skills", skills)}
+
+## Experience
+"""
+    for exp in experience:
+        candidate_summary += f"- {exp.get('role')} at {exp.get('organization')}\n"
+
+    candidate_summary += "\n## Projects\n"
+    for proj in projects:
+        candidate_summary += f"- {proj.get('name')}: {proj.get('description')} (Tech: {', '.join(proj.get('tech_stack', []))})\n"
+
+    prompt = f"""
+{JOB_MATCH_SYSTEM_PROMPT}
+
+# Job Description to Analyze:
+
+{job_description}
+
+
+# Candidate Profile (Do not invent anything outside this):
+
+{candidate_summary}
+"""
     return prompt

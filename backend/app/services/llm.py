@@ -25,3 +25,17 @@ def stream_response(prompt: str):
         if content:
             yield content
             time.sleep(0.02)
+
+
+def get_json_response(prompt: str) -> str:
+    response = client.chat.completions.create(
+        model=settings.MODEL_NAME,
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        response_format={"type": "json_object"}
+    )
+    return response.choices[0].message.content

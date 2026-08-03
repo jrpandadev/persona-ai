@@ -65,25 +65,41 @@
       "live_demo": ""
     },
     {
-    "name": "CareerLens AI",
-    "description": "An AI-powered resume analysis and job matching platform that evaluates resumes against job descriptions, identifies skill gaps, and provides actionable feedback for candidates.",
-    "tech_stack": [
-      "Python",
-      "FastAPI",
-      "Groq API",
-      "Pydantic"
-    ],
-    "highlights": [
-      "Resume parsing",
-      "AI-powered resume scoring",
-      "Job description matching",
-      "Skill gap analysis",
-      "Structured JSON output",
-      "REST API development"
-    ],
-    "github": "https://github.com/jrpandadev/career-lens-ai",
-    "live_demo": ""
-  }
+      "name": "CareerLens AI",
+      "description": "An AI-powered resume analysis and job matching platform that evaluates resumes against job descriptions, identifies skill gaps, and provides actionable feedback for candidates.",
+      "tech_stack": [
+        "Python",
+        "Groq API",
+        "Pydantic"
+      ],
+      "highlights": [
+        "Resume parsing",
+        "AI-powered resume scoring",
+        "Job description matching",
+        "Skill gap analysis",
+        "Structured JSON output"
+      ],
+      "github": "https://github.com/jrpandadev/career-lens-ai",
+      "live_demo": ""
+    },
+    {
+      "name": "AEGIS",
+      "description": "An AI Safety Platform incorporating real-time mapping, LLM-driven safety assessment, and secure backend architecture.",
+      "tech_stack": [
+        "FastAPI",
+        "Supabase",
+        "Mistral AI",
+        "Google Maps Platform"
+      ],
+      "highlights": [
+        "AI Safety Platform",
+        "Geospatial & Map Integration",
+        "Database Architecture",
+        "Mistral AI Integration"
+      ],
+      "github": "",
+      "live_demo": ""
+    }
   ],
   "experience": [],
   "certifications": [],
