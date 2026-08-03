@@ -95,11 +95,20 @@ ${result.suggested_questions?.length ? `### Suggested Interview Questions\n${res
     <>
       <Toast message={toastMessage} onClose={() => setToastMessage('')} />
       
-      <GlassCard className="w-full max-w-xl h-[560px] md:h-[600px] flex flex-col p-6 mx-auto relative overflow-hidden print:h-auto print:max-w-none print:bg-white print:text-black">
+      <GlassCard className="w-full max-w-xl h-[560px] md:h-[600px] flex flex-col p-6 mx-auto relative overflow-hidden print-report-container print:h-auto print:max-w-none print:bg-white print:text-black print:overflow-visible print:p-0 print:border-none print:shadow-none">
         {/* Background glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-cyan-500/10 rounded-full blur-[100px] pointer-events-none print:hidden" />
 
-        <div className="flex flex-col h-full z-10">
+        <div className="flex flex-col h-full z-10 print:h-auto print:overflow-visible">
+          {/* Print PDF Document Header */}
+          <div className="hidden print:block mb-6 border-b-2 border-gray-200 pb-4">
+            <h1 className="text-2xl font-bold text-black tracking-tight">Candidate Evaluation & Interview Report</h1>
+            <div className="flex justify-between items-center text-xs text-gray-500 mt-2 font-mono">
+              <span>Candidate: <strong>Jyoti Ranjan Panda</strong></span>
+              <span>Generated: {new Date().toLocaleDateString()}</span>
+            </div>
+          </div>
+
           <div className="flex items-center justify-between mb-4 print:hidden">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               📊 Recruiter Dashboard
@@ -126,7 +135,7 @@ ${result.suggested_questions?.length ? `### Suggested Interview Questions\n${res
               No job description provided.
             </div>
           ) : (
-            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-6">
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-6 print:overflow-visible print:h-auto print:pr-0">
 
               {/* Action / Export Toolbar */}
               <div className="flex items-center justify-between bg-black/30 p-2.5 rounded-xl border border-white/10 print:hidden">

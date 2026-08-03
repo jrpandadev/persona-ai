@@ -95,3 +95,55 @@ body {
   outline: 2px solid rgb(6 182 212 / 0.6);
   outline-offset: 2px;
 }
+
+/* ── Print Media Styles (PDF Export of Interview Report Only) ────────────── */
+@media print {
+  /* Force white background and black text */
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* Hide background overlays, gradients, and navigation */
+  nav,
+  footer,
+  .print-hide,
+  #projects,
+  #skills,
+  #education,
+  #contact,
+  .fixed.inset-0 {
+    display: none !important;
+  }
+
+  /* Reset layout constraints for PDF multi-page pagination */
+  main,
+  #home,
+  #home > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    display: block !important;
+  }
+
+  /* Clean up print card container */
+  .print-report-container {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+}
+

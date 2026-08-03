@@ -28,7 +28,7 @@ function App() {
     <ErrorBoundary>
       <div className="min-h-screen bg-surface-950 text-white font-sans relative overflow-hidden">
         {/* Background ambient gradients & Cursor Glow */}
-        <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+        <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden print:hidden">
           {/* Cursor Glow */}
           <div 
             className="absolute w-[600px] h-[600px] bg-cyan-400/[0.04] rounded-full blur-[100px] transition-transform duration-1000 ease-out"
@@ -46,27 +46,29 @@ function App() {
 
         <Navbar />
 
-        <main className="pt-24 pb-16 px-6 md:px-12 max-w-[1400px] mx-auto z-10 relative space-y-12">
+        <main className="pt-24 pb-16 px-6 md:px-12 max-w-[1400px] mx-auto z-10 relative space-y-12 print:p-0 print:m-0 print:max-w-none">
           {/* Hero + Interactive Section — side by side on desktop */}
           <section
             id="home"
-            className="w-full flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 min-h-[calc(100vh-160px)] scroll-mt-24"
+            className="w-full flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 min-h-[calc(100vh-160px)] scroll-mt-24 print:min-h-0 print:block print:gap-0"
             aria-label="Hero and AI Chat"
           >
-            <AnimatedSection direction="left" className="w-full md:w-1/2 flex flex-col justify-center">
+            <AnimatedSection direction="left" className="w-full md:w-1/2 flex flex-col justify-center print:hidden">
               <Hero />
             </AnimatedSection>
 
-            <AnimatedSection direction="right" delay={0.2} className="w-full md:w-1/2 flex flex-col items-center gap-6">
+            <AnimatedSection direction="right" delay={0.2} className="w-full md:w-1/2 flex flex-col items-center gap-6 print:w-full print:block">
               
-              <JobContextPanel 
-                jobDescription={jobDescription} 
-                setJobDescription={(jd) => {
-                  setJobDescription(jd);
-                  if (!jd) setShowReport(false);
-                }}
-                onGenerateReport={() => setShowReport(true)}
-              />
+              <div className="w-full print:hidden">
+                <JobContextPanel 
+                  jobDescription={jobDescription} 
+                  setJobDescription={(jd) => {
+                    setJobDescription(jd);
+                    if (!jd) setShowReport(false);
+                  }}
+                  onGenerateReport={() => setShowReport(true)}
+                />
+              </div>
 
               {showReport ? (
                 <JobMatchBox jobDescription={jobDescription} onBack={() => setShowReport(false)} />
@@ -79,13 +81,15 @@ function App() {
           </section>
 
           {/* Portfolio Sections */}
-          <Projects />
-          <Skills />
-          <Education />
-          <Contact />
+          <div className="print:hidden">
+            <Projects />
+            <Skills />
+            <Education />
+            <Contact />
+          </div>
         </main>
 
-        <footer className="w-full py-10 border-t border-white/6 text-center text-xs font-mono text-gray-500 z-10 relative bg-surface-950">
+        <footer className="w-full py-10 border-t border-white/6 text-center text-xs font-mono text-gray-500 z-10 relative bg-surface-950 print:hidden">
           <div className="mb-4">Built with</div>
           <div className="flex justify-center gap-4 text-cyan-400/80 mb-6 flex-wrap">
             <span>React</span>
