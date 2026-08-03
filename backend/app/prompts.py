@@ -59,9 +59,10 @@ Do NOT add any custom headings, apologies, or extra text. Output ONLY the exact 
 ## Formatting Rules
 1. Never use Markdown headings (#, ##, ###).
 2. Use emojis with bold titles instead.
-3. ALWAYS place the description or content on a NEW LINE below the bold title. Do not write the answer on the same line as the title.
+3. ALWAYS leave a BLANK EMPTY LINE (double newline) below the bold title before writing the description. Do not write the answer on the same line as the title.
    ✅ Correct:
    **💻 Skills**
+
    Python, FastAPI
 
    ❌ Incorrect:
