@@ -1,0 +1,48 @@
+{
+  "personal": {
+    "name": "Jane Doe",
+    "title": "Software Engineer | AI Specialist",
+    "location": "City, Country",
+    "email": "janedoe@example.com",
+    "bio": "Passionate Software Engineer specializing in building scalable web applications and integrating AI models."
+  },
+  "education": [
+    {
+      "institution": "Example University",
+      "degree": "B.S. in Computer Science",
+      "field_of_study": "Computer Science",
+      "cgpa": "3.8",
+      "start_year": "2020",
+      "end_year": "2024"
+    }
+  ],
+  "skills": {
+    "languages": ["Python", "JavaScript"],
+    "frameworks": ["FastAPI", "React"],
+    "frontend": ["HTML", "CSS", "Tailwind CSS"],
+    "ai_ml": ["Prompt Engineering", "LLM Integration"],
+    "databases": ["PostgreSQL"],
+    "tools": ["Git", "GitHub", "Docker"],
+    "cloud": ["AWS"],
+    "other": ["REST API Development"]
+  },
+  "projects": [
+    {
+      "name": "Sample AI Project",
+      "description": "A showcase project demonstrating AI integration and full-stack capabilities.",
+      "tech_stack": ["Python", "FastAPI", "React"],
+      "highlights": ["LLM Integration", "Responsive Design"],
+      "github": "https://github.com/example/project",
+      "live_demo": "https://example.com"
+    }
+  ],
+  "experience": [],
+  "certifications": [],
+  "achievements": [],
+  "social_links": {
+    "github": "https://github.com/example",
+    "linkedin": "https://linkedin.com/in/example",
+    "portfolio": "https://example.com"
+  },
+  "interests": ["Artificial Intelligence", "Web Development", "Open Source"]
+}
