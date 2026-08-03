@@ -156,6 +156,23 @@ ${result.suggested_questions?.length ? `### Suggested Interview Questions\n${res
                 </div>
               </div>
 
+              {/* Phase 1: Submitted Job Description */}
+              {jobDescription && (
+                <div className="p-4 bg-white/5 border border-white/10 rounded-xl print:border-gray-300 print:bg-gray-50 print:p-4">
+                  <h3 className="text-sm font-bold text-cyan-400 mb-2 print:text-black print:text-sm print:font-bold flex items-center gap-2">
+                    <span>📋</span> Phase 1: Submitted Job Description
+                  </h3>
+                  <div className="text-xs text-gray-300 print:text-gray-800 leading-relaxed whitespace-pre-wrap max-h-36 overflow-y-auto custom-scrollbar print:max-h-none print:overflow-visible">
+                    {jobDescription}
+                  </div>
+                </div>
+              )}
+
+              {/* Phase 2: Interview Evaluation & Match Analysis Header (Print Only) */}
+              <div className="hidden print:block text-xs font-mono uppercase tracking-wider font-bold text-gray-500 border-b border-gray-300 pb-1 mt-6">
+                Phase 2: Candidate Interview Evaluation & Match Analysis
+              </div>
+
               {/* Score & Confidence Section */}
               <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl print:border-black">
                 <div className="flex flex-col">

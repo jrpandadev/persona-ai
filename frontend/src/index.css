@@ -98,27 +98,42 @@ body {
 
 /* ── Print Media Styles (PDF Export of Interview Report Only) ────────────── */
 @media print {
-  /* Force white background and black text */
-  html, body {
+  @page {
+    size: auto;
+    margin: 12mm 15mm;
+  }
+
+  /* Force clean white background and black text throughout */
+  html, body, #root {
     background: #ffffff !important;
     color: #000000 !important;
     overflow: visible !important;
     height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
-  /* Hide background overlays, gradients, and navigation */
+  /* Completely eradicate hidden layout elements from document flow */
   nav,
   footer,
   .print-hide,
+  .print\:hidden,
   #projects,
   #skills,
   #education,
   #contact,
   .fixed.inset-0 {
     display: none !important;
+    height: 0 !important;
+    width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
   }
 
-  /* Reset layout constraints for PDF multi-page pagination */
+  /* Reset parent containers for clean page flow */
   main,
   #home,
   #home > div {
@@ -128,10 +143,12 @@ body {
     margin: 0 !important;
     height: auto !important;
     min-height: 0 !important;
+    max-height: none !important;
     display: block !important;
+    overflow: visible !important;
   }
 
-  /* Clean up print card container */
+  /* Report Card Container */
   .print-report-container {
     position: static !important;
     width: 100% !important;
@@ -144,6 +161,19 @@ body {
     border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Ensure card blocks inside report don't break awkwardly across pages */
+  .print-report-container > div > div > div {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Remove bottom spacing on the final element to eliminate trailing blank pages */
+  .print-report-container *:last-child {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
   }
 }
 
