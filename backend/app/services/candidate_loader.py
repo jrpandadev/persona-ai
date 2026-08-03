@@ -8,7 +8,7 @@ def load_candidate():
         path = data_dir / "candidate.json"
         
         if not path.exists():
-            path = data_dir / "candidate.example.json"
+            raise FileNotFoundError(f"candidate.json not found at {path}")
 
         with open(path, "r", encoding="utf-8") as file:
             return json.load(file)

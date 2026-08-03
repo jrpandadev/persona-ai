@@ -4,10 +4,6 @@ __pycache__/
 *.pyc
 .venv/
 .pytest_cache/
-candidate.json
-**/candidate.json
-!candidate.example.json
-
 # Node
 node_modules/
 dist/
