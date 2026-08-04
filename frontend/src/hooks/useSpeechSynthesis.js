@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 
 export function useSpeechSynthesis() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const synth = window.speechSynthesis;
+  const synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
   const currentUtteranceRef = useRef(null);
 
   useEffect(() => {

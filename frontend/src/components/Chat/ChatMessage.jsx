@@ -17,11 +17,15 @@ export function ChatMessage({ role, content, index, isStreaming }) {
   const [copied, setCopied] = useState(false);
   const { isPlaying, speak, stop } = useSpeechSynthesis();
 
-  const handleCopy = () => {
+  const handleCopy = async () => {
     if (!content) return;
-    navigator.clipboard.writeText(content);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
   };
 
   return (

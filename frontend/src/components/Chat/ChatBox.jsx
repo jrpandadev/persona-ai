@@ -15,6 +15,15 @@ import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
  * - Glassmorphism design
  * - Accessible labels
  */
+const PLACEHOLDERS = [
+  'Ask me anything...',
+  'Ask about CareerLens AI...',
+  'Explain CareerLens AI...',
+  'Show your projects...',
+  'Why should we hire you?',
+  'What technologies do you know?',
+];
+
 export function ChatBox({ jobDescription }) {
   const { messages, input, setInput, isLoading, handleSend, clearChat } = useChat(jobDescription);
   const messagesContainerRef = useRef(null);
@@ -46,18 +55,10 @@ export function ChatBox({ jobDescription }) {
   }, [input]);
 
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
-  const placeholders = [
-    'Ask me anything...',
-    'Ask about CareerLens AI...',
-    'Explain CareerLens AI...',
-    'Show your projects...',
-    'Why should we hire you?',
-    'What technologies do you know?',
-  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setPlaceholderIdx((prev) => (prev + 1) % 6);
+      setPlaceholderIdx((prev) => (prev + 1) % PLACEHOLDERS.length);
     }, 3000);
     return () => clearInterval(interval);
   }, []);
@@ -164,7 +165,7 @@ export function ChatBox({ jobDescription }) {
                 handleSend();
               }
             }}
-            placeholder={placeholders[placeholderIdx]}
+            placeholder={PLACEHOLDERS[placeholderIdx]}
             autoComplete="off"
             className="
               w-full bg-white/[0.03] border border-white/8 rounded-xl
@@ -175,7 +176,7 @@ export function ChatBox({ jobDescription }) {
               min-h-[44px]
             "
           />
-          <div className="absolute right-2 bottom-3 flex items-center gap-1 h-8">
+          <div className="absolute right-3 bottom-1.5 flex items-center gap-1 h-8">
             <button
               type="button"
               onClick={handleToggleListening}

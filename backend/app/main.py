@@ -1,4 +1,12 @@
+"""
+FastAPI application entry point.
+
+Configures CORS, registers routes, and validates settings at startup
+using the modern `lifespan` context manager pattern.
+"""
+
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,10 +16,33 @@ from app.routes.chat import router as chat_router
 
 logger = logging.getLogger("persona-ai")
 
-app = FastAPI(title=settings.APP_NAME)
 
-# Parse and clean origins from FRONTEND_URL
-allowed_origins = [
+# ── Lifespan ─────────────────────────────────────────────────────────────────
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Startup / shutdown lifecycle hook (replaces deprecated on_event)."""
+    # ── Startup ──
+    settings.validate()
+    logger.info("🚀 %s started | Model: %s", settings.APP_NAME, settings.MODEL_NAME)
+    yield
+    # ── Shutdown ──
+    logger.info("👋 %s shutting down", settings.APP_NAME)
+
+
+# ── App ──────────────────────────────────────────────────────────────────────
+
+app = FastAPI(
+    title=settings.APP_NAME,
+    lifespan=lifespan,
+    docs_url="/docs" if settings.DEBUG else None,
+    redoc_url="/redoc" if settings.DEBUG else None,
+)
+
+
+# ── CORS ─────────────────────────────────────────────────────────────────────
+
+_allowed_origins: list[str] = [
     "http://localhost:5173",
     "http://localhost:3000",
     "http://127.0.0.1:5173",
@@ -20,39 +51,36 @@ allowed_origins = [
 
 if settings.FRONTEND_URL:
     for url in settings.FRONTEND_URL.split(","):
-        clean_url = url.strip().rstrip("/")
-        if clean_url and clean_url not in allowed_origins:
-            allowed_origins.append(clean_url)
+        clean = url.strip().rstrip("/")
+        if clean and clean not in _allowed_origins:
+            _allowed_origins.append(clean)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_origin_regex=r"https://.*\.vercel\.app",  # Matches any Vercel domain / preview link
+    allow_origins=_allowed_origins,
+    # Match Vercel preview deploys — anchored to prevent wildcard abuse
+    allow_origin_regex=r"https://[\w-]+\.vercel\.app",
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type"],
 )
+
+
+# ── Routes ───────────────────────────────────────────────────────────────────
 
 app.include_router(chat_router)
 
 
-@app.on_event("startup")
-def validate_config():
-    if not settings.GROQ_API_KEY:
-        raise RuntimeError("GROQ_API_KEY environment variable is required")
-    logger.info(f"🚀 {settings.APP_NAME} started | Model: {settings.MODEL_NAME}")
-
-
 @app.get("/")
 def read_root():
-    return {"message": "AI Portfolio Backend Running"}
+    """Root probe — confirms the API is reachable."""
+    return {"status": "ok", "app": settings.APP_NAME}
 
 
 @app.get("/health")
 def health_check():
-    """Health check endpoint for Render/PaaS load balancers."""
+    """Health check for load balancers (Render, Railway, etc.)."""
     return {
         "status": "healthy",
         "model": settings.MODEL_NAME,
-        "frontend_url": settings.FRONTEND_URL
     }

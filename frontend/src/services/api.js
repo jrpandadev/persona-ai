@@ -23,7 +23,7 @@ export async function sendChatMessageStream(question, history = [], job_descript
   } catch (networkErr) {
     if (networkErr.name === 'AbortError') throw networkErr;
     console.error('Network/CORS error reaching backend:', networkErr);
-    throw new Error(`Unable to connect to server at ${API_BASE_URL}. Please check your network connection or CORS configuration.`);
+    throw new Error(`Unable to connect to server at ${API_BASE_URL}. Please check your network connection or CORS configuration.`, { cause: networkErr });
   }
 
   if (!response.ok) {
@@ -75,7 +75,7 @@ export async function analyzeJobMatch(job_description, signal) {
   } catch (networkErr) {
     if (networkErr.name === 'AbortError') throw networkErr;
     console.error('Network/CORS error during job match:', networkErr);
-    throw new Error(`Unable to connect to server at ${API_BASE_URL}. Please check network or CORS settings.`);
+    throw new Error(`Unable to connect to server at ${API_BASE_URL}. Please check network or CORS settings.`, { cause: networkErr });
   }
 
   if (!response.ok) {

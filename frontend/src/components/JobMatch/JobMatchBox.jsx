@@ -87,10 +87,15 @@ ${result.learning_roadmap?.length ? `### Learning Roadmap (To bridge gaps)\n${re
 `;
   };
 
-  const handleCopyMarkdown = () => {
+  const handleCopyMarkdown = async () => {
     const md = generateMarkdownReport();
-    navigator.clipboard.writeText(md);
-    setToastMessage('Report copied as Markdown! 📋');
+    try {
+      await navigator.clipboard.writeText(md);
+      setToastMessage('Report copied as Markdown! 📋');
+    } catch (err) {
+      console.error('Failed to copy report:', err);
+      setToastMessage('Failed to copy — please try again.');
+    }
   };
 
   const handlePrint = () => {
@@ -111,7 +116,7 @@ ${result.learning_roadmap?.length ? `### Learning Roadmap (To bridge gaps)\n${re
             <h1 className="text-2xl font-bold text-black tracking-tight">Candidate Evaluation & Interview Report</h1>
             <div className="flex justify-between items-center text-xs text-gray-500 mt-2 font-mono">
               <span>Candidate: <strong>Jyoti Ranjan Panda</strong></span>
-              <span>Generated: {new Date().toLocaleDateString()}</span>
+              <span>Generated: {new Date().toISOString().slice(0, 10)}</span>
             </div>
           </div>
 
@@ -133,8 +138,14 @@ ${result.learning_roadmap?.length ? `### Learning Roadmap (To bridge gaps)\n${re
               <span className="text-sm font-medium animate-pulse">Analyzing Candidate Profile & Generating Report...</span>
             </div>
           ) : error ? (
-            <div className="flex-1 flex items-center justify-center">
+            <div className="flex-1 flex flex-col items-center justify-center gap-4">
               <div className="text-red-400 text-sm px-2">⚠️ {error}</div>
+              <button
+                onClick={() => { setError(''); setLoading(true); }}
+                className="px-4 py-2 text-xs font-mono bg-white/5 hover:bg-white/10 text-cyan-300 border border-white/10 rounded-lg transition-colors"
+              >
+                🔄 Retry Analysis
+              </button>
             </div>
           ) : !result ? (
             <div className="flex-1 flex items-center justify-center text-gray-500 text-sm">

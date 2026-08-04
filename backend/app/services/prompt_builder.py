@@ -1,8 +1,22 @@
+"""
+Prompt construction for chat and job-match endpoints.
+
+Converts the raw candidate.json dict into clean, readable text and
+assembles the system/user message pair for each LLM call.
+
+The formatted profile is cached because the underlying candidate data
+is static (loaded once via lru_cache in candidate_loader).
+"""
+
+from functools import lru_cache
+
 from app.prompts import SYSTEM_PROMPT, JOB_MATCH_SYSTEM_PROMPT
 
 
+# ── Formatting Helpers ───────────────────────────────────────────────────────
+
 def _format_list_section(title: str, items: list) -> str:
-    """Formats a simple list section."""
+    """Format a simple list section (e.g., Achievements, Certifications)."""
     if not items:
         return ""
     lines = [f"\n[{title.upper()}]\n"]
@@ -12,7 +26,7 @@ def _format_list_section(title: str, items: list) -> str:
 
 
 def _format_dict_section(title: str, data: dict) -> str:
-    """Formats a dictionary section."""
+    """Format a dictionary section (e.g., Skills, Social Links)."""
     if not data:
         return ""
     lines = [f"\n[{title.upper()}]\n"]
@@ -26,7 +40,7 @@ def _format_dict_section(title: str, data: dict) -> str:
 
 def _format_candidate_profile(candidate: dict) -> str:
     """Convert candidate.json into clean, readable text for the prompt."""
-    sections = []
+    sections: list[str] = []
 
     # Personal Information
     personal = candidate.get("personal", {})
@@ -129,6 +143,39 @@ def _format_candidate_profile(candidate: dict) -> str:
     return "\n\n".join(sections)
 
 
+# ── Cached Profile Text ─────────────────────────────────────────────────────
+
+@lru_cache(maxsize=1)
+def _get_profile_text(profile_hash: int) -> str:
+    """
+    Cache the formatted profile text.
+
+    The `profile_hash` parameter exists solely to make lru_cache work with
+    a dict input — the caller passes id(candidate) which is stable because
+    the candidate dict itself is cached via lru_cache in candidate_loader.
+    """
+    # This is a trick: we can't hash a dict, but since the dict is a cached
+    # singleton, its id() is stable. The actual candidate dict is passed to
+    # _format_candidate_profile via the build_* functions below.
+    raise RuntimeError("Should not be called directly")
+
+
+_cached_profile_text: str | None = None
+_cached_profile_id: int | None = None
+
+
+def _get_or_format_profile(candidate: dict) -> str:
+    """Return cached formatted profile text, rebuilding only if the dict changes."""
+    global _cached_profile_text, _cached_profile_id
+    candidate_id = id(candidate)
+    if _cached_profile_id != candidate_id or _cached_profile_text is None:
+        _cached_profile_text = _format_candidate_profile(candidate)
+        _cached_profile_id = candidate_id
+    return _cached_profile_text
+
+
+# ── Public API ───────────────────────────────────────────────────────────────
+
 def build_prompt(
     candidate: dict,
     user_question: str,
@@ -137,23 +184,34 @@ def build_prompt(
 ) -> tuple[str, str]:
     """
     Build the chat prompt.
-    Returns (system_prompt, user_message) tuple for proper LLM message separation.
-    """
-    profile_text = _format_candidate_profile(candidate)
 
-    jd_block = ""
-    if job_description and job_description.strip():
-        jd_block = f"\n\n# Job Description Context\n\n{job_description.strip()}"
+    Returns (system_prompt, user_message) tuple.
+
+    The candidate profile is embedded in the system prompt. The job
+    description (if provided) is appended to the user message to avoid
+    bloating the system prompt on every conversation turn.
+    """
+    profile_text = _get_or_format_profile(candidate)
 
     system_prompt = f"""{SYSTEM_PROMPT}
 
 # Candidate Profile (ONLY source of truth — never go beyond this)
 
 {profile_text}
-{jd_block}
 """
 
-    return system_prompt, user_question
+    # Embed JD in the user message, not the system prompt, to avoid
+    # sending it redundantly with every history message.
+    user_msg = user_question
+    if job_description and job_description.strip():
+        user_msg = f"""{user_question}
+
+---
+[Active Job Description Context — use this to provide role-aware answers]
+
+{job_description.strip()}"""
+
+    return system_prompt, user_msg
 
 
 def build_job_match_prompt(
@@ -162,9 +220,10 @@ def build_job_match_prompt(
 ) -> tuple[str, str]:
     """
     Build the JD analysis prompt.
+
     Returns (system_prompt, user_message) tuple.
     """
-    profile_text = _format_candidate_profile(candidate)
+    profile_text = _get_or_format_profile(candidate)
 
     user_message = f"""Analyze this job description against the candidate profile and produce a match report.
 

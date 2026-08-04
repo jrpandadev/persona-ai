@@ -10,7 +10,9 @@ export function useSpeechRecognition() {
     // Check for browser support
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      setError('Speech recognition is not supported in this browser.');
+      setTimeout(() => {
+        setError('Speech recognition is not supported in this browser.');
+      }, 0);
       return;
     }
 

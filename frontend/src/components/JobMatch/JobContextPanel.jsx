@@ -12,7 +12,7 @@ export function JobContextPanel({ jobDescription, setJobDescription, onGenerateR
 
   const handleRemove = () => {
     setInputText('');
-    setJobDescription('');
+    setJobDescription(null);
   };
 
   const isLoaded = !!jobDescription;

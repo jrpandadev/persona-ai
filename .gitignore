@@ -1,12 +1,30 @@
+# ── Environment ──
 .env
-*.env
+.env.*
+!.env.example
+
+# ── Python ──
 __pycache__/
 *.pyc
+*.pyo
 .venv/
 .pytest_cache/
-# Node
+*.egg-info/
+dist/
+
+# ── Node ──
 node_modules/
 dist/
 dist-ssr/
 *.local
+
+# ── IDE ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── OS ──
 .DS_Store
+Thumbs.db

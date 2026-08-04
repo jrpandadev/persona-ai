@@ -12,16 +12,25 @@ const INITIAL_MESSAGE = {
  * Custom hook encapsulating all chat logic:
  * - Message state management
  * - Streaming API calls
- * - Auto-scroll via ref
  * - Loading / error states
  * - Request cancellation via AbortController
+ *
+ * The initial greeting is filtered out of history sent to the backend
+ * to avoid wasting LLM tokens on a static message.
  */
 export function useChat(jobDescription = null) {
   const [messages, setMessages] = useState([INITIAL_MESSAGE]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const scrollAnchorRef = useRef(null);
   const abortControllerRef = useRef(null);
+
+  // Use a ref to read the latest messages inside the callback
+  // without adding `messages` to the dependency array.
+  const messagesRef = useRef(messages);
+  
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   // Cleanup pending requests if component unmounts
   useEffect(() => {
@@ -46,11 +55,15 @@ export function useChat(jobDescription = null) {
 
       setInput('');
 
-      // Build history from current messages
-      const history = messages.map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      }));
+      // Build history from current messages, filtering out the
+      // static initial greeting to avoid sending it to the LLM.
+      const currentMessages = messagesRef.current;
+      const history = currentMessages
+        .filter((msg) => msg !== INITIAL_MESSAGE)
+        .map((msg) => ({
+          role: msg.role,
+          content: msg.content,
+        }));
 
       // Add user message
       setMessages((prev) => [...prev, { role: 'user', content: question }]);
@@ -62,9 +75,9 @@ export function useChat(jobDescription = null) {
 
       try {
         await sendChatMessageStream(
-          question, 
-          history, 
-          jobDescription, 
+          question,
+          history,
+          jobDescription,
           (chunk) => {
             setMessages((prev) => {
               const updated = [...prev];
@@ -76,14 +89,14 @@ export function useChat(jobDescription = null) {
               return updated;
             });
           },
-          signal
+          signal,
         );
       } catch (err) {
         if (err.name === 'AbortError') {
           console.log('Request was cancelled');
-          return; // Do nothing if we intentionally aborted
+          return;
         }
-        
+
         console.error('Chat error:', err);
         const userFacingMessage = err.message
           ? `Sorry, I ran into an issue: ${err.message}`
@@ -104,7 +117,7 @@ export function useChat(jobDescription = null) {
         }
       }
     },
-    [input, messages, jobDescription]
+    [input, jobDescription],
   );
 
   const clearChat = useCallback(() => {
@@ -123,6 +136,5 @@ export function useChat(jobDescription = null) {
     isLoading,
     handleSend,
     clearChat,
-    scrollAnchorRef,
   };
 }

@@ -1,3 +1,11 @@
+"""
+Chat API routes.
+
+Provides two endpoints:
+  POST /chat/       — Streaming conversational chat
+  POST /chat/job-match — Structured job description analysis (JSON)
+"""
+
 import json
 import logging
 
@@ -16,6 +24,7 @@ router = APIRouter(prefix="/chat", tags=["Chat"])
 
 @router.post("/")
 async def chat(request: ChatRequest):
+    """Stream an AI response grounded in the candidate profile."""
     try:
         candidate = load_candidate()
 
@@ -28,23 +37,27 @@ async def chat(request: ChatRequest):
 
         history = [msg.model_dump() for msg in request.history]
 
-        logger.info(f"Chat request: {len(request.question)} chars, {len(history)} history msgs")
+        logger.info(
+            "Chat request: %d chars, %d history msgs",
+            len(request.question),
+            len(history),
+        )
 
         return StreamingResponse(
             stream_response(system_prompt, user_message, history),
-            media_type="text/plain",
+            media_type="text/plain; charset=utf-8",
         )
 
     except FileNotFoundError as e:
-        logger.error(f"Candidate file error: {e}")
+        logger.error("Candidate file error: %s", e)
         raise HTTPException(status_code=404, detail=str(e))
 
     except ValueError as e:
-        logger.warning(f"Validation error: {e}")
+        logger.warning("Validation error: %s", e)
         raise HTTPException(status_code=400, detail=str(e))
 
     except Exception as e:
-        logger.error(f"Unexpected chat error: {e}", exc_info=True)
+        logger.error("Unexpected chat error: %s", e, exc_info=True)
         raise HTTPException(
             status_code=500,
             detail="An unexpected error occurred. Please try again.",
@@ -53,6 +66,7 @@ async def chat(request: ChatRequest):
 
 @router.post("/job-match")
 async def job_match(request: JobMatchRequest):
+    """Analyze a job description against the candidate profile."""
     try:
         candidate = load_candidate()
 
@@ -61,14 +75,17 @@ async def job_match(request: JobMatchRequest):
             request.job_description,
         )
 
-        logger.info(f"Job match request: {len(request.job_description)} chars")
+        logger.info("Job match request: %d chars", len(request.job_description))
 
         response_json_str = await get_json_response(system_prompt, user_message)
 
         try:
             response_dict = json.loads(response_json_str)
         except json.JSONDecodeError:
-            logger.error(f"LLM returned invalid JSON: {response_json_str[:200]}")
+            logger.error(
+                "LLM returned invalid JSON (first 200 chars): %s",
+                response_json_str[:200],
+            )
             raise HTTPException(
                 status_code=502,
                 detail="AI returned an invalid response. Please try again.",
@@ -80,15 +97,15 @@ async def job_match(request: JobMatchRequest):
         raise
 
     except FileNotFoundError as e:
-        logger.error(f"Candidate file error: {e}")
+        logger.error("Candidate file error: %s", e)
         raise HTTPException(status_code=404, detail=str(e))
 
     except ValueError as e:
-        logger.warning(f"Validation error: {e}")
+        logger.warning("Validation error: %s", e)
         raise HTTPException(status_code=400, detail=str(e))
 
     except Exception as e:
-        logger.error(f"Unexpected job-match error: {e}", exc_info=True)
+        logger.error("Unexpected job-match error: %s", e, exc_info=True)
         raise HTTPException(
             status_code=500,
             detail="An unexpected error occurred. Please try again.",
