@@ -57,9 +57,11 @@ export function useChat(jobDescription = null) {
 
       // Build history from current messages, filtering out the
       // static initial greeting to avoid sending it to the LLM.
+      // Keep only the most recent 6 messages to reduce token usage.
       const currentMessages = messagesRef.current;
       const history = currentMessages
         .filter((msg) => msg !== INITIAL_MESSAGE)
+        .slice(-6)
         .map((msg) => ({
           role: msg.role,
           content: msg.content,
@@ -120,6 +122,13 @@ export function useChat(jobDescription = null) {
     [input, jobDescription],
   );
 
+  const stopGeneration = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    setIsLoading(false);
+  }, []);
+
   const clearChat = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -135,6 +144,7 @@ export function useChat(jobDescription = null) {
     setInput,
     isLoading,
     handleSend,
+    stopGeneration,
     clearChat,
   };
 }

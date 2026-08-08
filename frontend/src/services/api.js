@@ -33,23 +33,33 @@ export async function sendChatMessageStream(question, history = [], job_descript
 
   const reader = response.body.getReader();
   const decoder = new TextDecoder('utf-8');
+  let buffer = '';
 
   try {
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
 
-      // Ensure { stream: true } so multi-byte unicode chars aren't split across chunks
-      const chunk = decoder.decode(value, { stream: true });
-      if (chunk && onChunk) {
-        onChunk(chunk);
+      buffer += decoder.decode(value, { stream: true });
+      
+      let newlineIdx;
+      while ((newlineIdx = buffer.indexOf('\n\n')) >= 0) {
+        const eventStr = buffer.slice(0, newlineIdx);
+        buffer = buffer.slice(newlineIdx + 2);
+        
+        if (eventStr.startsWith('data: ')) {
+          const dataStr = eventStr.slice(6);
+          if (dataStr === '[DONE]' || dataStr === '"[DONE]"') break;
+          try {
+            const chunk = JSON.parse(dataStr);
+            if (chunk && onChunk) {
+              onChunk(chunk);
+            }
+          } catch (e) {
+            console.error('Failed to parse SSE data', e);
+          }
+        }
       }
-    }
-    
-    // Flush the final bytes
-    const finalChunk = decoder.decode();
-    if (finalChunk && onChunk) {
-      onChunk(finalChunk);
     }
   } finally {
     reader.releaseLock();

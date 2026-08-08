@@ -45,6 +45,8 @@ async def stream_response(
     text — the caller (route) is responsible for catching and returning
     an appropriate HTTP error.
     """
+    import json
+    
     messages = [{"role": "system", "content": system_prompt}]
 
     if history:
@@ -67,8 +69,10 @@ async def stream_response(
             async for chunk in stream:
                 content = chunk.choices[0].delta.content
                 if content:
-                    yield content
+                    yield f"data: {json.dumps(content)}\n\n"
                     await asyncio.sleep(0)  # Yield control to event loop
+            
+            yield "data: \"[DONE]\"\n\n"
 
     except asyncio.CancelledError:
         logger.info("Client disconnected during stream — terminating gracefully")
@@ -76,11 +80,13 @@ async def stream_response(
 
     except asyncio.TimeoutError:
         logger.error("LLM streaming timed out after %.0fs", timeout_seconds)
-        yield "\n\nSorry, the response took too long. Please try again."
+        yield f"data: {json.dumps(chr(10) + chr(10) + 'Sorry, the response took too long. Please try again.')}\n\n"
+        yield "data: \"[DONE]\"\n\n"
 
     except Exception as e:
         logger.error("LLM streaming error: %s", e, exc_info=True)
-        yield "\n\nSorry, I encountered an issue generating a response. Please try again."
+        yield f"data: {json.dumps(chr(10) + chr(10) + 'Sorry, I encountered an issue generating a response. Please try again.')}\n\n"
+        yield "data: \"[DONE]\"\n\n"
 
 
 # ── JSON Response ────────────────────────────────────────────────────────────

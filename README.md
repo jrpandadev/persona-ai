@@ -2,7 +2,7 @@
 
 An AI-powered portfolio that lets recruiters **chat with an AI representative** of the candidate, run **evidence-based job description matching**, and **export interview reports** — all grounded in verified profile data with zero hallucination.
 
-> **Live Demo**: [jyoti-ai.vercel.app](https://persona-h91yne6oe-yoo21.vercel.app/) _(update with your URL)_
+> **Live Demo**: [jyoti-ai.vercel.app](https://persona-cl0lcak2n-yoo21.vercel.app/) _(update with your URL)_
 
 ---
 

@@ -25,7 +25,7 @@ const PLACEHOLDERS = [
 ];
 
 export function ChatBox({ jobDescription }) {
-  const { messages, input, setInput, isLoading, handleSend, clearChat } = useChat(jobDescription);
+  const { messages, input, setInput, isLoading, handleSend, stopGeneration, clearChat } = useChat(jobDescription);
   const messagesContainerRef = useRef(null);
   
   const [baseInput, setBaseInput] = useState('');
@@ -106,20 +106,34 @@ export function ChatBox({ jobDescription }) {
           </div>
         </div>
 
-        {/* Clear Chat Button */}
-        {hasUserMessages && (
-          <button
-            onClick={clearChat}
-            disabled={isLoading}
-            className="
-              px-2.5 py-1 text-[11px] font-mono text-gray-400 border border-white/10 rounded-md
-              hover:text-white hover:border-red-400/40 hover:bg-red-500/10
-              transition-all duration-200 disabled:opacity-30
-            "
-          >
-            🗑 Clear
-          </button>
-        )}
+        {/* Header Actions */}
+        <div className="flex gap-2">
+          {isLoading && hasUserMessages && (
+            <button
+              onClick={stopGeneration}
+              className="
+                px-2.5 py-1 text-[11px] font-mono text-cyan-400 border border-cyan-400/40 rounded-md
+                hover:bg-cyan-500/10 transition-all duration-200
+              "
+              title="Stop Generating"
+            >
+              ⏹ Stop
+            </button>
+          )}
+          {hasUserMessages && (
+            <button
+              onClick={clearChat}
+              disabled={isLoading}
+              className="
+                px-2.5 py-1 text-[11px] font-mono text-gray-400 border border-white/10 rounded-md
+                hover:text-white hover:border-red-400/40 hover:bg-red-500/10
+                transition-all duration-200 disabled:opacity-30
+              "
+            >
+              🗑 Clear
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Messages */}

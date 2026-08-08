@@ -45,7 +45,7 @@ async def chat(request: ChatRequest):
 
         return StreamingResponse(
             stream_response(system_prompt, user_message, history),
-            media_type="text/plain; charset=utf-8",
+            media_type="text/event-stream",
         )
 
     except FileNotFoundError as e:
